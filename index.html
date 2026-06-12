@@ -29,6 +29,18 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
       <div class="tool-desc">多人消费AA分摊，支持多轮次合并结算</div>
     </div>
   </a>
+  <a href="tools/regex-tester.html" class="tool-item">
+    <div>
+      <div class="tool-name">正则测试器</div>
+      <div class="tool-desc">在线调试正则表达式，支持分组</div>
+    </div>
+  </a>
+  <a href="tools/url-encode.html" class="tool-item">
+    <div>
+      <div class="tool-name">URL 编解码</div>
+      <div class="tool-desc">URL 编码和解码，支持中文</div>
+    </div>
+  </a>
   <a href="tools/json-formatter.html" class="tool-item">
     <div>
       <div class="tool-name">JSON 格式化</div>
@@ -53,7 +65,7 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
 </div>
 <script>
 const statusBar = document.getElementById('statusBar');
-const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"]):not([href*="ledger"]):not([href*="json-formatter"])').length;
+const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"]):not([href*="ledger"]):not([href*="json-formatter"]):not([href*="url-encode"]):not([href*="regex-tester"])').length;
 statusBar.textContent = `当前共 ${toolCount} 个工具 · 每日更新一个`;
 </script>
 </body>
