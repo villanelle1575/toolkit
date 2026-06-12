@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON 格式化</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Courier New', monospace; background: #1e1e1e; color: #d4d4d4; font-size: 13px; }
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+a { color: #888; text-decoration: none; font-size: 0.85rem; font-family: -apple-system, sans-serif; }
+a:hover { color: #fff; }
+h1 { font-size: 1.1rem; font-weight: 600; margin-bottom: 2px; color: #eee; font-family: -apple-system, sans-serif; }
+.sub { color: #888; font-size: 0.8rem; margin-bottom: 12px; font-family: -apple-system, sans-serif; }
+.toolbar { display: flex; gap: 6px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+button { padding: 5px 12px; border: 1px solid #444; border-radius: 3px; background: #2d2d2d; color: #d4d4d4; cursor: pointer; font-size: 0.8rem; }
+button:hover { background: #3d3d3d; border-color: #666; }
+button.primary { background: #0078d4; color: #fff; border-color: #0078d4; }
+button.primary:hover { background: #1a8cd4; }
+.panels { display: flex; gap: 8px; }
+.panel { flex: 1; }
+.panel-label { font-size: 0.75rem; color: #888; margin-bottom: 4px; font-family: -apple-system, sans-serif; }
+textarea { width: 100%; height: 400px; background: #252526; border: 1px solid #3c3c3c; border-radius: 4px; color: #d4d4d4; padding: 10px; font-family: 'Courier New', monospace; font-size: 13px; resize: vertical; outline: none; }
+textarea:focus { border-color: #0078d4; }
+.status-bar { margin-top: 6px; font-size: 0.8rem; color: #888; font-family: -apple-system, sans-serif; }
+.error { color: #f44747; }
+.success { color: #4ec9b0; }
+.indent-select { background: #2d2d2d; color: #d4d4d4; border: 1px solid #444; border-radius: 3px; padding: 4px 6px; font-size: 0.8rem; outline: none; }
+label { font-size: 0.8rem; color: #888; font-family: -apple-system, sans-serif; }
+@media (max-width: 640px) { .panels { flex-direction: column; } textarea { height: 200px; } }
+</style>
+</head>
+<body>
+<div class="container">
+<a href="../index.html">&larr; 返回工具集</a>
+<h1>JSON 格式化 / 校验</h1>
+<p class="sub">粘贴 JSON，自动格式化和校验</p>
+
+<div class="toolbar">
+  <button class="primary" onclick="format()">格式化</button>
+  <button onclick="minify()">压缩</button>
+  <button onclick="copyResult()">复制结果</button>
+  <button onclick="clearAll()">清空</button>
+  <span style="flex:1;"></span>
+  <label>缩进</label>
+  <select class="indent-select" id="indentSelect">
+    <option value="2">2 空格</option>
+    <option value="4" selected>4 空格</option>
+  </select>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="panel-label">输入</div>
+    <textarea id="inputArea" placeholder="粘贴 JSON 到这里..." spellcheck="false"></textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-label">输出</div>
+    <textarea id="outputArea" placeholder="格式化后的 JSON 会显示在这里..." spellcheck="false" readonly></textarea>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">就绪</div>
+</div>
+
+<script>
+function format() {
+  const input = document.getElementById('inputArea').value.trim();
+  const status = document.getElementById('statusBar');
+  if (!input) { status.textContent = '请粘贴 JSON'; return; }
+  try {
+    const parsed = JSON.parse(input);
+    const indent = parseInt(document.getElementById('indentSelect').value);
+    document.getElementById('outputArea').value = JSON.stringify(parsed, null, indent);
+    status.innerHTML = '<span class="success">&#10003; 有效的 JSON</span>';
+  } catch(e) {
+    document.getElementById('outputArea').value = '';
+    status.innerHTML = '<span class="error">&#10007; ' + e.message.replace(/</g, '&lt;') + '</span>';
+  }
+}
+
+function minify() {
+  const input = document.getElementById('inputArea').value.trim();
+  const status = document.getElementById('statusBar');
+  if (!input) { status.textContent = '请粘贴 JSON'; return; }
+  try {
+    const parsed = JSON.parse(input);
+    document.getElementById('outputArea').value = JSON.stringify(parsed);
+    status.innerHTML = '<span class="success">&#10003; 已压缩</span>';
+  } catch(e) {
+    document.getElementById('outputArea').value = '';
+    status.innerHTML = '<span class="error">&#10007; ' + e.message.replace(/</g, '&lt;') + '</span>';
+  }
+}
+
+function copyResult() {
+  const text = document.getElementById('outputArea').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const status = document.getElementById('statusBar');
+    status.textContent = '已复制到剪贴板';
+    setTimeout(() => { status.innerHTML = '<span class="success">&#10003; 有效的 JSON</span>'; }, 2000);
+  }).catch(() => {
+    document.getElementById('outputArea').select();
+    document.execCommand('copy');
+  });
+}
+
+function clearAll() {
+  document.getElementById('inputArea').value = '';
+  document.getElementById('outputArea').value = '';
+  document.getElementById('statusBar').textContent = '已清空';
+}
+
+// Support Ctrl+Enter to format
+document.getElementById('inputArea').addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'Enter') { format(); }
+});
+</script>
+</body>
+</html>
