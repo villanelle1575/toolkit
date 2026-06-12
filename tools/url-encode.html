@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL 编解码</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:#f5f5f5;color:#222;font-size:14px}
+.container{max-width:720px;margin:0 auto;padding:20px 12px}
+a{color:#444;text-decoration:none;font-size:0.85rem}
+h1{font-size:1.3rem;font-weight:600;margin-bottom:2px}
+.sub{color:#888;font-size:0.85rem;margin-bottom:14px}
+.section{background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:16px;margin-bottom:10px}
+textarea{width:100%;height:120px;border:1px solid #ccc;border-radius:4px;padding:10px;font-family:monospace;font-size:13px;outline:none;resize:vertical}
+textarea:focus{border-color:#666}
+button{padding:6px 14px;border:1px solid #888;border-radius:4px;background:#fff;cursor:pointer;font-size:0.9rem}
+button:hover{background:#f0f0f0}
+button.primary{background:#222;color:#fff;border-color:#222}
+.status{font-size:0.85rem;color:#888;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="container">
+<a href="../index.html">&larr; 返回工具集</a>
+<h1>URL 编解码</h1>
+<p class="sub">URL 编码和解码，支持中文和特殊字符</p>
+<div class="section">
+<button class="primary" onclick="window.encode()">编码</button>
+<button onclick="window.decode()">解码</button>
+<button onclick="window.swap()">交换上下</button>
+<button onclick="window.clearAll()">清空</button>
+<textarea id="inputArea" style="margin-top:8px" placeholder="输入要编码或解码的文本..."></textarea>
+<div style="text-align:center;padding:6px 0;color:#aaa">\u2193</div>
+<textarea id="outputArea" placeholder="结果会显示在这里..." readonly></textarea>
+<div class="status" id="statusBar"></div>
+</div>
+</div>
+<script>
+window.encode=function(){var v=document.getElementById("inputArea").value;if(!v)return;document.getElementById("outputArea").value=encodeURIComponent(v);document.getElementById("statusBar").textContent="已编码"};
+window.decode=function(){var v=document.getElementById("inputArea").value;if(!v)return;try{document.getElementById("outputArea").value=decodeURIComponent(v);document.getElementById("statusBar").textContent="已解码"}catch(e){document.getElementById("statusBar").textContent="解码失败: "+e.message}};
+window.swap=function(){var i=document.getElementById("inputArea"),o=document.getElementById("outputArea");var t=i.value;i.value=o.value;o.value=t};
+window.clearAll=function(){document.getElementById("inputArea").value="";document.getElementById("outputArea").value="";document.getElementById("statusBar").textContent=""};
+</script>
+</body>
+</html>
