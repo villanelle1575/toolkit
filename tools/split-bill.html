@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分账计算器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #222; line-height: 1.5; font-size: 14px; }
+.container { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+a { color: #444; text-decoration: none; font-size: 0.85rem; }
+a:hover { color: #000; }
+h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 16px; }
+h2 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; margin-top: 20px; }
+.section { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 16px; margin-bottom: 12px; }
+.row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+.row-label { min-width: 60px; color: #666; font-size: 0.85rem; }
+input[type="text"], input[type="number"] { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; flex: 1; min-width: 80px; }
+input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #666; }
+select { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; background: #fff; }
+button { padding: 6px 14px; border: 1px solid #888; border-radius: 4px; background: #fff; cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
+button:hover { background: #f0f0f0; }
+button.primary { background: #222; color: #fff; border-color: #222; }
+button.primary:hover { background: #444; }
+button.danger { color: #c00; border-color: #ecc; }
+button.danger:hover { background: #fee; }
+.tag { display: inline-block; padding: 2px 8px; background: #eee; border-radius: 3px; font-size: 0.8rem; margin: 2px; cursor: pointer; }
+.tag.selected { background: #222; color: #fff; }
+.expense-item { padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+.expense-item:last-child { border-bottom: none; }
+.expense-item .del { float: right; color: #c00; cursor: pointer; }
+.result-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.result-table th, .result-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid #eee; }
+.result-table th { color: #666; font-weight: 500; }
+.settlement { margin-top: 8px; }
+.settlement-item { padding: 6px 10px; background: #f8f8f8; border-radius: 4px; margin: 4px 0; }
+.empty-state { color: #999; font-size: 0.85rem; padding: 12px 0; }
+.flex { display: flex; gap: 8px; align-items: center; }
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.checkbox-grid { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+<a href="../index.html">&larr; 返回工具集</a>
+<h1>分账计算器</h1>
+
+<div class="section">
+  <h2>参与人</h2>
+  <div class="row">
+    <input type="text" id="personInput" placeholder="输入名字" style="flex:0 0 160px;">
+    <button onclick="addPerson()">添加</button>
+  </div>
+  <div id="personList" class="empty-state">还没有添加参与人</div>
+</div>
+
+<div class="section">
+  <h2>添加费用</h2>
+  <div class="row">
+    <span class="row-label">支付人</span>
+    <select id="payerSelect" style="flex:1;"></select>
+  </div>
+  <div class="row">
+    <span class="row-label">金额</span>
+    <input type="number" id="amountInput" placeholder="0.00" min="0" step="0.01">
+  </div>
+  <div class="row">
+    <span class="row-label">备注</span>
+    <input type="text" id="memoInput" placeholder="可选，如'火锅'" style="flex:1;">
+  </div>
+  <div>
+    <div class="row-label mb-8">分摊人员 <span style="color:#999;font-size:0.8rem;">（不选则全员）</span></div>
+    <div id="splitPersons" class="checkbox-grid"></div>
+  </div>
+  <div class="mt-8">
+    <button class="primary" onclick="addExpense()">➕ 添加这笔费用</button>
+  </div>
+</div>
+
+<div class="section" id="expenseSection">
+  <h2>费用清单</h2>
+  <div id="expenseList" class="empty-state">暂无费用记录</div>
+</div>
+
+<div class="section">
+  <button class="primary" onclick="calculate()" style="width:100%;padding:10px;font-size:1rem;">🧮 算账</button>
+</div>
+
+<div id="resultSection" style="display:none;">
+  <div class="section">
+    <h2>人均应摊</h2>
+    <table class="result-table">
+      <thead><tr><th>参与人</th><th>代付</th><th>应摊</th><th>差额</th></tr></thead>
+      <tbody id="perPersonTable"></tbody>
+    </table>
+  </div>
+  <div class="section">
+    <h2>结算方案</h2>
+    <div id="settlementList"></div>
+  </div>
+</div>
+
+<script>
+let people = [];
+let expenses = [];
+
+function addPerson() {
+  const input = document.getElementById('personInput');
+  const name = input.value.trim();
+  if (!name) return;
+  if (people.includes(name)) { alert('该参与人已存在'); return; }
+  people.push(name);
+  input.value = '';
+  renderPeople();
+  renderPayerSelect();
+  renderSplitCheckboxes();
+}
+
+function removePerson(name) {
+  people = people.filter(p => p !== name);
+  expenses = expenses.filter(e => e.payer !== name);
+  renderPeople();
+  renderPayerSelect();
+  renderSplitCheckboxes();
+  renderExpenses();
+}
+
+function renderPeople() {
+  const el = document.getElementById('personList');
+  if (people.length === 0) {
+    el.innerHTML = '<span class="empty-state">还没有添加参与人</span>';
+    return;
+  }
+  el.innerHTML = people.map(p =>
+    `<span class="tag selected">${p} <span class="del" onclick="removePerson('${p}')" style="margin-left:4px;">&times;</span></span>`
+  ).join(' ');
+}
+
+function renderPayerSelect() {
+  const sel = document.getElementById('payerSelect');
+  sel.innerHTML = people.map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+function renderSplitCheckboxes() {
+  const el = document.getElementById('splitPersons');
+  if (people.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = people.map(p =>
+    `<span class="tag selected" data-person="${p}" onclick="toggleSplitPerson(this)">${p}</span>`
+  );
+}
+
+function toggleSplitPerson(el) {
+  el.classList.toggle('selected');
+}
+
+function getSelectedSplitPersons() {
+  const tags = document.querySelectorAll('#splitPersons .tag');
+  const selected = [];
+  tags.forEach(t => { if (t.classList.contains('selected')) selected.push(t.dataset.person); });
+  return selected.length === people.length ? [] : selected;
+}
+
+function addExpense() {
+  const payer = document.getElementById('payerSelect').value;
+  const amount = parseFloat(document.getElementById('amountInput').value);
+  const memo = document.getElementById('memoInput').value.trim();
+  if (!payer || !amount || amount <= 0) { alert('请选择支付人并输入有效金额'); return; }
+  const split = getSelectedSplitPersons();
+  expenses.push({ payer, amount, memo, split });
+  document.getElementById('amountInput').value = '';
+  document.getElementById('memoInput').value = '';
+  renderExpenses();
+}
+
+function removeExpense(idx) {
+  expenses.splice(idx, 1);
+  renderExpenses();
+}
+
+function renderExpenses() {
+  const el = document.getElementById('expenseList');
+  if (expenses.length === 0) {
+    el.innerHTML = '<span class="empty-state">暂无费用记录</span>';
+    return;
+  }
+  el.innerHTML = expenses.map((e, i) => {
+    const splitInfo = e.split.length > 0 ? `（仅 ${e.split.join(', ')}）` : '（全员）';
+    const memoText = e.memo ? ` · ${e.memo}` : '';
+    return `<div class="expense-item">${e.payer} 付了 ¥${e.amount.toFixed(2)}${memoText}${splitInfo} <span class="del" onclick="removeExpense(${i})">&times;</span></div>`;
+  }).join('');
+}
+
+function calculate() {
+  if (people.length < 2) { alert('至少需要2个参与人'); return; }
+  if (expenses.length === 0) { alert('请至少添加一笔费用'); return; }
+
+  const net = {};
+  people.forEach(p => net[p] = 0);
+
+  expenses.forEach(e => {
+    const participants = e.split.length > 0 ? e.split : people;
+    const perPerson = e.amount / participants.length;
+    net[e.payer] += e.amount;
+    participants.forEach(p => net[p] -= perPerson);
+  });
+
+  // Per person table
+  const tbody = document.getElementById('perPersonTable');
+  tbody.innerHTML = people.map(p => {
+    const paid = expenses.filter(e => e.payer === p).reduce((s, e) => s + e.amount, 0);
+    const share = paid - net[p];
+    return `<tr><td>${p}</td><td>¥${paid.toFixed(2)}</td><td>¥${share.toFixed(2)}</td><td style="color:${net[p] > 0 ? '#c00' : net[p] < 0 ? '#080' : '#999'}">${net[p] >= 0 ? '' : '欠 '}¥${Math.abs(net[p]).toFixed(2)}</td></tr>`;
+  }).join('');
+
+  // Settlement
+  const debtors = people.filter(p => net[p] < 0).sort((a, b) => net[a] - net[b]);
+  const creditors = people.filter(p => net[p] > 0).sort((a, b) => net[b] - net[a]);
+
+  const settlements = [];
+  let i = 0, j = 0;
+  while (i < debtors.length && j < creditors.length) {
+    const d = debtors[i];
+    const c = creditors[j];
+    const amount = Math.min(-net[d], net[c]);
+    settlements.push({ from: d, to: c, amount });
+    net[d] += amount;
+    net[c] -= amount;
+    if (Math.abs(net[d]) < 0.01) i++;
+    if (Math.abs(net[c]) < 0.01) j++;
+  }
+
+  const settlementEl = document.getElementById('settlementList');
+  if (settlements.length === 0) {
+    settlementEl.innerHTML = '<div class="empty-state">账目已平，无需结算</div>';
+  } else {
+    settlementEl.innerHTML = settlements.map(s =>
+      `<div class="settlement-item">${s.from} → ${s.to} 支付 ¥${s.amount.toFixed(2)}</div>`
+    ).join('');
+  }
+
+  document.getElementById('resultSection').style.display = 'block';
+}
+</script>
+</body>
+</html>
