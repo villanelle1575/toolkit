@@ -23,10 +23,16 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
 <h1>🧰 工具集</h1>
 <p class="subtitle">每天一个实用小工具</p>
 <div class="tool-list" id="toolList">
-  <a href="tools/split-bill.html" class="tool-item">
+  <a href="tools/split-bill.html" class="tool-item" style="margin-bottom:4px;">
     <div>
       <div class="tool-name">分账计算器</div>
       <div class="tool-desc">多人消费AA分摊，支持多轮次合并结算</div>
+    </div>
+  </a>
+  <a href="donate.html" class="tool-item" style="border-color:#ccc;border-style:dashed;">
+    <div>
+      <div class="tool-name">☕ 赞赏支持</div>
+      <div class="tool-desc">如果好用，欢迎请一杯咖啡</div>
     </div>
   </a>
   <div id="morePlaceholder"></div>
@@ -35,7 +41,7 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
 </div>
 <script>
 const statusBar = document.getElementById('statusBar');
-const toolCount = document.querySelectorAll('.tool-item').length;
+const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"])').length;
 statusBar.textContent = `当前共 ${toolCount} 个工具 · 每日更新一个`;
 </script>
 </body>
