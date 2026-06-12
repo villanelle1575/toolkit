@@ -35,6 +35,18 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
       <div class="tool-desc">在线调试正则表达式，支持分组</div>
     </div>
   </a>
+  <a href="tools/base64.html" class="tool-item">
+    <div>
+      <div class="tool-name">Base64 编解码</div>
+      <div class="tool-desc">文本和 Base64 互相转换</div>
+    </div>
+  </a>
+  <a href="tools/timestamp.html" class="tool-item">
+    <div>
+      <div class="tool-name">时间戳转换</div>
+      <div class="tool-desc">Unix 时间戳与日期互转[刷新]</div>
+    </div>
+  </a>
   <a href="tools/url-encode.html" class="tool-item">
     <div>
       <div class="tool-name">URL 编解码</div>
@@ -65,7 +77,7 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
 </div>
 <script>
 const statusBar = document.getElementById('statusBar');
-const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"]):not([href*="ledger"]):not([href*="json-formatter"]):not([href*="url-encode"]):not([href*="regex-tester"])').length;
+const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"]):not([href*="ledger"]):not([href*="json-formatter"]):not([href*="url-encode"]):not([href*="regex-tester"]):not([href*="base64"]):not([href*="timestamp"])').length;
 statusBar.textContent = `当前共 ${toolCount} 个工具 · 每日更新一个`;
 </script>
 </body>
