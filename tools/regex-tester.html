@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正则测试器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Courier New,monospace;background:#1e1e1e;color:#d4d4d4;font-size:13px}
+.container{max-width:800px;margin:0 auto;padding:16px}
+a{color:#888;text-decoration:none;font-size:0.85rem;font-family:-apple-system,sans-serif}
+a:hover{color:#fff}
+h1{font-size:1.1rem;font-weight:600;margin-bottom:2px;color:#eee;font-family:-apple-system,sans-serif}
+.sub{color:#888;font-size:0.8rem;margin-bottom:10px;font-family:-apple-system,sans-serif}
+.section{background:#252526;border:1px solid #3c3c3c;border-radius:4px;padding:12px;margin-bottom:8px}
+.row{display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap}
+label{font-size:0.8rem;color:#888;font-family:-apple-system,sans-serif;min-width:40px}
+input{flex:1;padding:6px 10px;border:1px solid #3c3c3c;border-radius:3px;background:#2d2d2d;color:#d4d4d4;font-family:monospace;font-size:13px;outline:none}
+input:focus{border-color:#0078d4}
+textarea{width:100%;height:120px;padding:10px;border:1px solid #3c3c3c;border-radius:3px;background:#2d2d2d;color:#d4d4d4;font-family:monospace;font-size:13px;outline:none;resize:vertical}
+textarea:focus{border-color:#0078d4}
+button{padding:5px 12px;border:1px solid #444;border-radius:3px;background:#2d2d2d;color:#d4d4d4;cursor:pointer;font-size:0.8rem;font-family:-apple-system,sans-serif}
+button:hover{background:#3d3d3d}
+button.primary{background:#0078d4;color:#fff;border-color:#0078d4}
+.match-count{font-size:0.8rem;color:#4ec9b0;font-family:-apple-system,sans-serif}
+.result-line{padding:3px 0;border-bottom:1px solid #333;font-size:13px}
+.highlight{background:#264f78;border-radius:2px;padding:0 2px}
+.flag{display:inline-block;padding:2px 8px;border:1px solid #444;border-radius:3px;font-size:0.75rem;cursor:pointer;font-family:-apple-system,sans-serif;background:#2d2d2d;color:#888}
+.flag.active{background:#0078d4;color:#fff;border-color:#0078d4}
+.flags{display:flex;gap:4px;flex-wrap:wrap}
+.error{color:#f44747;font-size:0.8rem;font-family:-apple-system,sans-serif}
+</style>
+</head>
+<body>
+<div class="container">
+<a href="../index.html">&larr; 返回工具集</a>
+<h1>正则测试器</h1>
+<p class="sub">在线测试和调试正则表达式</p>
+<div class="section">
+<div class="row">
+<label>正则</label>
+<input type="text" id="patternInput" placeholder="输入正则，如 \\d+\\.\\d+" oninput="window.test()">
+</div>
+<div class="row">
+<label style="min-width:40px">标志</label>
+<div class="flags" id="flagContainer">
+<span class="flag" onclick="window.toggleFlag(this,\'g\')">g</span>
+<span class="flag" onclick="window.toggleFlag(this,\'i\')">i</span>
+<span class="flag active" onclick="window.toggleFlag(this,\'m\')">m</span>
+<span class="flag" onclick="window.toggleFlag(this,\'s\')">s</span>
+</div>
+</div>
+</div>
+<div class="section">
+<textarea id="testInput" placeholder="输入测试文本..." oninput="window.test()">hello world 123.45
+test 678.90 foo
+bar 111.22</textarea>
+</div>
+<div class="section">
+<div class="match-count" id="matchCount">匹配: 0 个</div>
+<div id="resultArea" style="margin-top:6px"></div>
+<div id="errorArea"></div>
+</div>
+</div>
+<script>
+var flags=[];
+document.querySelectorAll(\'#flagContainer .flag\').forEach(function(f){if(f.classList.contains(\'active\'))flags.push(f.textContent);});
+window.toggleFlag=function(el,f){el.classList.toggle(\'active\');if(el.classList.contains(\'active\')){if(flags.indexOf(f)<0)flags.push(f);}else{var i=flags.indexOf(f);if(i>=0)flags.splice(i,1);}window.test();};
+function esc(s){return s.replace(/&/g,\'&amp;\').replace(/</g,\'&lt;\').replace(/>/g,\'&gt;\');}
+window.test=function(){
+  var p=document.getElementById(\'patternInput\').value;
+  var t=document.getElementById(\'testInput\').value;
+  var mc=document.getElementById(\'matchCount\');
+  var ra=document.getElementById(\'resultArea\');
+  var ea=document.getElementById(\'errorArea\');
+  if(!p){mc.textContent=\'匹配: 0 个\';ra.innerHTML=\'\';ea.innerHTML=\'\';return;}
+  try{
+    var re=new RegExp(p,flags.join(\'\'));
+    var matches=[],m;
+    while((m=re.exec(t))!==null){matches.push(m);if(!re.global)break;}
+    mc.textContent=\'匹配: \'+matches.length+\' 个\';
+    ea.innerHTML=\'\';
+    ra.innerHTML=matches.map(function(m,i){
+      var idx=m.index;
+      var before=esc(t.slice(Math.max(0,idx-20),idx));
+      var matched=esc(m[0]);
+      var after=esc(t.slice(idx+m[0].length,idx+m[0].length+20));
+      var detail=\'\';
+      if(m.length>1){
+        var groups=[];
+        for(var j=1;j<m.length;j++){groups.push(\'$\'+j+\'=\'+(m[j]||\'\'));}
+        detail=\'<div style="font-size:0.75rem;color:#888;padding-left:16px">\'+groups.join(\', \')+\'</div>\';
+      }
+      return \'<div class="result-line">#\'+(i+1)+\' @\'+idx+\': \'+before+\'<span class="highlight">\'+matched+\'</span>\'+after+detail+\'</div>\';
+    }).join(\'\');
+  }catch(e){
+    mc.textContent=\'匹配: 0 个\';
+    ra.innerHTML=\'\';
+    ea.innerHTML=\'<div class="error">\'+esc(e.message)+\'</div>\';
+  }
+};
+window.addEventListener(\'DOMContentLoaded\',window.test);
+</script>
+</body>
+</html>
