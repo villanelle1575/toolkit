@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>时间戳转换</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;background:#1e1e1e;color:#d4d4d4;font-size:14px}
+.container{max-width:600px;margin:0 auto;padding:20px 12px}
+a{color:#888;text-decoration:none;font-size:0.85rem;font-family:-apple-system,sans-serif}
+a:hover{color:#fff}
+h1{font-size:1.1rem;font-weight:600;margin-bottom:2px;color:#eee;font-family:-apple-system,sans-serif}
+.sub{color:#888;font-size:0.8rem;margin-bottom:14px;font-family:-apple-system,sans-serif}
+.section{background:#252526;border:1px solid #3c3c3c;border-radius:4px;padding:20px;margin-bottom:10px}
+input{width:100%;padding:8px 12px;border:1px solid #3c3c3c;border-radius:3px;background:#2d2d2d;color:#d4d4d4;font-family:monospace;font-size:14px;outline:none;text-align:center}
+input:focus{border-color:#0078d4}
+input::placeholder{color:#555}
+.result{text-align:center;padding:12px;font-size:1.5rem;color:#4ec9b0}
+.label{font-size:0.8rem;color:#888;margin-top:12px;margin-bottom:4px;font-family:-apple-system,sans-serif}
+button{padding:6px 14px;border:1px solid #444;border-radius:3px;background:#2d2d2d;color:#d4d4d4;cursor:pointer;font-size:0.85rem;font-family:-apple-system,sans-serif;margin-right:6px}
+button:hover{background:#3d3d3d}
+button.primary{background:#0078d4;color:#fff;border-color:#0078d4}
+.donate-link{text-align:center;margin-top:12px;font-size:0.8rem;color:#555;font-family:-apple-system,sans-serif}
+.donate-link a{color:#555;text-decoration:underline}</style>
+</head>
+<body>
+<div class="container">
+<a href="../index.html">&larr; 返回工具集</a>
+<h1>时间戳转换</h1>
+<p class="sub">Unix 时间戳与日期互相转换</p>
+<div class="section">
+<div class="label">当前时间戳</div>
+<div id="currentTs" style="text-align:center;padding:8px;font-size:1.3rem;color:#4ec9b0"></div>
+<div class="label">时间戳 &#8594; 日期</div>
+<input type="text" id="tsInput" placeholder="输入时间戳（秒）" oninput="window.ts2date()">
+<div id="dateResult" class="result"></div>
+</div>
+<div class="section">
+<div class="label">日期 &#8594; 时间戳</div>
+<input type="text" id="dateInput" placeholder="输入日期 (2024-01-15 10:30:00)" oninput="window.date2ts()">
+<div id="tsResult" class="result"></div>
+</div>
+<div class="donate-link"><a href="../donate.html">好用的话，请我喝杯咖啡 &#9749;</a></div>
+</div>
+<script>
+window.ts2date=function(){
+  var v=document.getElementById("tsInput").value.trim();
+  if(!v){document.getElementById("dateResult").textContent="";return;}
+  var ts=parseInt(v);
+  if(isNaN(ts)||ts<0){document.getElementById("dateResult").textContent="无效时间戳";return;}
+  if(ts>1e12){ts=Math.floor(ts/1000);}
+  var d=new Date(ts*1000);
+  document.getElementById("dateResult").textContent=d.getFullYear()+"-"+(d.getMonth()+1).toString().padStart(2,"0")+"-"+d.getDate().toString().padStart(2,"0")+" "+d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0")+":"+d.getSeconds().toString().padStart(2,"0");
+};
+window.date2ts=function(){
+  var v=document.getElementById("dateInput").value.trim();
+  if(!v){document.getElementById("tsResult").textContent="";return;}
+  var d=new Date(v.replace(/-/g,"/"));
+  if(isNaN(d.getTime())){document.getElementById("tsResult").textContent="无效日期";return;}
+  document.getElementById("tsResult").textContent=Math.floor(d.getTime()/1000)+" (秒)";
+};
+window.updateTime=function(){
+  document.getElementById("currentTs").textContent=Math.floor(Date.now()/1000);
+};
+window.updateTime();
+setInterval(window.updateTime,1000);
+</script>
+</body>
+</html>
