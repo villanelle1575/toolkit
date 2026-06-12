@@ -29,6 +29,12 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
       <div class="tool-desc">多人消费AA分摊，支持多轮次合并结算</div>
     </div>
   </a>
+  <a href="tools/ledger.html" class="tool-item">
+    <div>
+      <div class="tool-name">收支记账</div>
+      <div class="tool-desc">每日收支记录，自动汇总结余</div>
+    </div>
+  </a>
   <a href="donate.html" class="tool-item" style="border-color:#ccc;border-style:dashed;">
     <div>
       <div class="tool-name">☕ 赞赏支持</div>
@@ -41,7 +47,7 @@ h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
 </div>
 <script>
 const statusBar = document.getElementById('statusBar');
-const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"])').length;
+const toolCount = document.querySelectorAll('.tool-item:not([href*="donate"]):not([href*="ledger"])').length;
 statusBar.textContent = `当前共 ${toolCount} 个工具 · 每日更新一个`;
 </script>
 </body>
